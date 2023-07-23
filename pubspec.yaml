@@ -1,8 +1,6 @@
 name: navi_light
-description: This package contains a recommended set of lints for Flutter apps,
-  packages, and plugins to encourage good coding practices in Flutter projects
-  of Mynavi Corporation.
-version: 1.0.0
+description: navi_light is a developer tool, designed to help stop common issues and simplify repetitive tasks. It adds various warnings with quick fixes and refactoring options.
+version: 1.0.1
 repository: https://github.com/minhnt3/navi_light
 issue_tracker: https://github.com/minhnt3/navi_light/issues
 

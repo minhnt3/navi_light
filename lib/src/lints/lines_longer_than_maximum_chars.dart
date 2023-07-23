@@ -59,7 +59,10 @@ class FormatCode extends OptionsFix {
       priority: 78,
     );
     changeBuilder.addDartFileEdit((builder) {
-      builder.formatWithPageWidth(resolver.documentRange);
+      builder.formatWithPageWidth(
+        resolver.documentRange,
+        pageWidth: options.rules.linesLongerThanMaximumCharsOption.maximumChars,
+      );
     });
   }
 }
