@@ -1,6 +1,6 @@
 name: navi_light
 description: navi_light is a developer tool, designed to help stop common issues and simplify repetitive tasks. It adds various warnings with quick fixes and refactoring options.
-version: 1.0.1
+version: 1.0.2
 repository: https://github.com/minhnt3/navi_light
 issue_tracker: https://github.com/minhnt3/navi_light/issues
 
@@ -8,8 +8,8 @@ environment:
   sdk: ">=3.0.5 <4.0.0"
 
 dependencies:
-  _fe_analyzer_shared: ^60.0.0
-  analyzer: ^5.12.0
+  _fe_analyzer_shared: ^61.0.0
+  analyzer: ^5.13.0
   analyzer_plugin: ^0.11.2
   custom_lint_builder: ^0.5.0
   dart_mappable: ^3.1.0
