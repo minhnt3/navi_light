@@ -1,31 +1,39 @@
 import '../index.dart';
 
-class AvoidUnnecessaryAsyncFunction extends OptionsLintRule {
-  const AvoidUnnecessaryAsyncFunction() : super(code: _code);
+class AvoidUnnecessaryAsyncFunction extends OptionsLintRule<AvoidUnnecessaryAsyncFunctionOption> {
+  AvoidUnnecessaryAsyncFunction(
+    CustomLintConfigs configs,
+  ) : super(
+          RuleConfig(
+              name: lintName,
+              configs: configs,
+              paramsParser: AvoidUnnecessaryAsyncFunctionOption.fromMap,
+              problemMessage: (_) =>
+                  'This async function is unnecessary. Please remove \'async\' keyword'),
+        );
 
-  static const _code = LintCode(
-    name: 'avoid_unnecessary_async_function',
-    problemMessage: 'This async function is unnecessary. Please remove \'async\' keyword',
-  );
+  static const String lintName = 'avoid_unnecessary_async_function';
 
   @override
-  void runWithOptions(
+  Future<void> run(
     CustomLintResolver resolver,
     ErrorReporter reporter,
     CustomLintContext context,
-    Options options,
-  ) {
-    if (options.isFileRuleExcluded(resolver.path)) {
+  ) async {
+    final rootPath = await resolver.rootPath;
+    final parameters = config.parameters;
+    if (parameters.shouldSkipAnalysis(
+      path: resolver.path,
+      rootPath: rootPath,
+    )) {
       return;
     }
 
-    final option = options.rules.avoidUnnecessaryAsyncFunctionOption;
+    final code = this.code.copyWith(
+          errorSeverity: parameters.severity ?? this.code.errorSeverity,
+        );
 
-    if (option.shouldSkipFile(resolver.path)) {
-      return;
-    }
-
-    resolver.getResolvedUnitResult().then(
+    unawaited(resolver.getResolvedUnitResult().then(
           (value) => value.unit.visitChildren(
             RecursiveFunctionAndMethodDeclarationVisitor(
               onVisitFunctionDeclaration: (node) {
@@ -33,7 +41,6 @@ class AvoidUnnecessaryAsyncFunction extends OptionsLintRule {
                     node.functionExpression.body is BlockFunctionBody &&
                     node.functionExpression.body.childAwaitExpressions.isEmpty &&
                     !_returnTypeIsFuture(node)) {
-                  final code = this.code.copyWith(errorSeverity: option.severity);
                   if (node.functionExpression.body.keyword != null) {
                     reporter.reportErrorForToken(code, node.functionExpression.body.keyword!);
                   } else {
@@ -47,7 +54,6 @@ class AvoidUnnecessaryAsyncFunction extends OptionsLintRule {
                     node.body is BlockFunctionBody &&
                     node.body.childAwaitExpressions.isEmpty &&
                     !_returnTypeIsFuture(node)) {
-                  final code = this.code.copyWith(errorSeverity: option.severity);
                   if (node.body.keyword != null) {
                     reporter.reportErrorForToken(code, node.body.keyword!);
                   } else {
@@ -57,7 +63,7 @@ class AvoidUnnecessaryAsyncFunction extends OptionsLintRule {
               },
             ),
           ),
-        );
+        ));
   }
 
   bool _returnTypeIsFuture(AstNode node) {
@@ -67,21 +73,22 @@ class AvoidUnnecessaryAsyncFunction extends OptionsLintRule {
 
   @override
   List<Fix> getFixes() => [
-        RemoveUnnecessaryAsyncKeyWord(),
+        RemoveUnnecessaryAsyncKeyWord(config),
       ];
 }
 
-class RemoveUnnecessaryAsyncKeyWord extends OptionsFix {
+class RemoveUnnecessaryAsyncKeyWord extends OptionsFix<AvoidUnnecessaryAsyncFunctionOption> {
+  RemoveUnnecessaryAsyncKeyWord(super.config);
+
   @override
-  void runWithOptions(
+  Future<void> run(
     CustomLintResolver resolver,
     ChangeReporter reporter,
     CustomLintContext context,
     AnalysisError analysisError,
     List<AnalysisError> others,
-    Options options,
-  ) {
-    resolver.getResolvedUnitResult().then(
+  ) async {
+    unawaited(resolver.getResolvedUnitResult().then(
           (value) => value.unit.visitChildren(
             RecursiveFunctionAndMethodDeclarationVisitor(
               onVisitFunctionDeclaration: (node) {
@@ -102,7 +109,7 @@ class RemoveUnnecessaryAsyncKeyWord extends OptionsFix {
               },
             ),
           ),
-        );
+        ));
   }
 
   void _fix({

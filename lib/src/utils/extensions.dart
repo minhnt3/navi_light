@@ -1,54 +1,5 @@
 import '../index.dart';
 
-extension StringExtension on List<String> {
-  List<RegExp> toRegExpList() => map(RegExp.new).toList();
-}
-
-extension RegexExtension on List<RegExp> {
-  bool has(String filepath) => any((path) => filepath.contains(path));
-}
-
-extension YamlMapConverter on YamlMap {
-  dynamic _convertNode(dynamic v) {
-    if (v is YamlMap) {
-      return v.toMap();
-    } else if (v is YamlList) {
-      final list = <dynamic>[];
-      for (final e in v) {
-        list.add(_convertNode(e));
-      }
-      return list;
-    } else {
-      return v;
-    }
-  }
-
-  Map<String, dynamic> toMap() {
-    final map = <String, dynamic>{};
-    nodes.forEach((k, v) => map[(k as YamlScalar).value.toString()] = _convertNode(v.value));
-    return map;
-  }
-}
-
-extension LintCodeCopyWith on LintCode {
-  LintCode copyWith({
-    String? name,
-    String? problemMessage,
-    String? correctionMessage,
-    String? uniqueName,
-    String? url,
-    ErrorSeverity? errorSeverity,
-  }) =>
-      LintCode(
-        name: name ?? this.name,
-        problemMessage: problemMessage ?? this.problemMessage,
-        correctionMessage: correctionMessage ?? this.correctionMessage,
-        uniqueName: uniqueName ?? this.uniqueName,
-        url: url ?? this.url,
-        errorSeverity: errorSeverity ?? this.errorSeverity,
-      );
-}
-
 extension AstNodeExt on AstNode {
   ClassDeclaration? get parentClassDeclaration => thisOrAncestorOfType<ClassDeclaration>();
 
@@ -127,6 +78,9 @@ extension DartFileEditBuilderExt on DartFileEditBuilder {
 }
 
 extension CustomLintResolverExt on CustomLintResolver {
+  Future<String> get rootPath async =>
+      (await getResolvedUnitResult()).session.analysisContext.contextRoot.root.path;
+
   void getLineContents(void Function(CodeLine codeLine) onCodeLine) {
     var previousLineContent = '';
     var isMultiLineComment = false;
@@ -191,4 +145,23 @@ extension MethodDeclarationExt on MethodDeclaration {
   }
 
   bool get isOverrideMethod => toString().trim().contains('@override');
+}
+
+extension LintCodeCopyWith on LintCode {
+  LintCode copyWith({
+    String? name,
+    String? problemMessage,
+    String? correctionMessage,
+    String? uniqueName,
+    String? url,
+    ErrorSeverity? errorSeverity,
+  }) =>
+      LintCode(
+        name: name ?? this.name,
+        problemMessage: problemMessage ?? this.problemMessage,
+        correctionMessage: correctionMessage ?? this.correctionMessage,
+        uniqueName: uniqueName ?? this.uniqueName,
+        url: url ?? this.url,
+        errorSeverity: errorSeverity ?? this.errorSeverity,
+      );
 }

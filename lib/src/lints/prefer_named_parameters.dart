@@ -1,57 +1,65 @@
 import '../index.dart';
 
-class PreferNamedParameters extends OptionsLintRule {
-  const PreferNamedParameters() : super(code: _code);
+class PreferNamedParameters extends OptionsLintRule<PreferNamedParametersOption> {
+  PreferNamedParameters(
+    CustomLintConfigs configs,
+  ) : super(
+          RuleConfig(
+              name: lintName,
+              configs: configs,
+              paramsParser: PreferNamedParametersOption.fromMap,
+              problemMessage: (_) =>
+                  'If a function or constructor takes more parameters than the threshold, use named parameters'),
+        );
 
-  static const _code = LintCode(
-    name: 'prefer_named_parameters',
-    problemMessage:
-        'If a function or constructor takes more parameters than the threshold, use named parameters',
-  );
+  static const String lintName = 'prefer_named_parameters';
 
   @override
-  void runWithOptions(
+  Future<void> run(
     CustomLintResolver resolver,
     ErrorReporter reporter,
     CustomLintContext context,
-    Options options,
-  ) {
-    if (options.isFileRuleExcluded(resolver.path)) {
+  ) async {
+    final rootPath = await resolver.rootPath;
+    final parameters = config.parameters;
+    if (parameters.shouldSkipAnalysis(
+      path: resolver.path,
+      rootPath: rootPath,
+    )) {
       return;
     }
 
-    final option = options.rules.preferNamedParametersOption;
+    final code = this.code.copyWith(
+          errorSeverity: parameters.severity ?? this.code.errorSeverity,
+        );
 
-    resolver.getResolvedUnitResult().then((value) =>
+    unawaited(resolver.getResolvedUnitResult().then((value) =>
         value.unit.visitChildren(RecursiveConstructorAndFunctionAndMethodDeclarationVisitor(
           onVisitFunctionDeclaration: (FunctionDeclaration node) {
-            final parameters =
+            final formalParams =
                 node.functionExpression.parameters?.parameters ?? <FormalParameter>[];
-            if (parameters.length >= option.threshold &&
-                parameters.where((element) => element.isNamed).length != parameters.length) {
-              final code = this.code.copyWith(errorSeverity: option.severity);
+            if (formalParams.length >= parameters.threshold &&
+                formalParams.where((element) => element.isNamed).length != formalParams.length) {
               reporter.reportErrorForNode(code, node.functionExpression.parameters!);
             }
           },
           onVisitMethodDeclaration: (MethodDeclaration node) {
-            final parameters = node.parameters?.parameters ?? <FormalParameter>[];
-            if (parameters.length >= option.threshold &&
+            final formalParams = node.parameters?.parameters ?? <FormalParameter>[];
+            if (formalParams.length >= parameters.threshold &&
                 !node.isOverrideMethod &&
-                parameters.where((element) => element.isNamed).length != parameters.length) {
-              final code = this.code.copyWith(errorSeverity: option.severity);
+                formalParams.where((element) => element.isNamed).length != formalParams.length) {
               reporter.reportErrorForNode(code, node.parameters!);
             }
           },
           onVisitConstructorDeclaration: (ConstructorDeclaration node) {
-            final parameters = node.parameters.parameters;
-            if (parameters.length >= option.threshold &&
+            final formalParams = node.parameters.parameters;
+            if (formalParams.length >= parameters.threshold &&
                 !_isConstuctorDeclarationException(node) &&
-                parameters.where((element) => element.isNamed).length != parameters.length) {
-              final code = this.code.copyWith(errorSeverity: option.severity);
+                formalParams.where((element) => element.isNamed).length != formalParams.length) {
               reporter.reportErrorForNode(code, node.parameters);
             }
           },
-        )));
+        ))));
   }
 
   bool _isConstuctorDeclarationException(ConstructorDeclaration node) {
@@ -63,21 +71,22 @@ class PreferNamedParameters extends OptionsLintRule {
 
   @override
   List<Fix> getFixes() => [
-        ConvertToNamedParameters(),
+        ConvertToNamedParameters(config),
       ];
 }
 
-class ConvertToNamedParameters extends OptionsFix {
+class ConvertToNamedParameters extends OptionsFix<PreferNamedParametersOption> {
+  ConvertToNamedParameters(super.config);
+
   @override
-  void runWithOptions(
+  Future<void> run(
     CustomLintResolver resolver,
     ChangeReporter reporter,
     CustomLintContext context,
     AnalysisError analysisError,
     List<AnalysisError> others,
-    Options options,
-  ) {
-    resolver.getResolvedUnitResult().then((value) => value.unit.visitChildren(
+  ) async {
+    unawaited(resolver.getResolvedUnitResult().then((value) => value.unit.visitChildren(
             RecursiveConstructorAndFunctionAndMethodDeclarationVisitor(
                 onVisitFunctionDeclaration: (FunctionDeclaration node) {
           if (node.functionExpression.parameters == null ||
@@ -103,7 +112,7 @@ class ConvertToNamedParameters extends OptionsFix {
             parameterList: node.parameters,
             reporter: reporter,
           );
-        })));
+        }))));
   }
 
   void _fix({

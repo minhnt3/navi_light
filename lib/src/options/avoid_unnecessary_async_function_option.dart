@@ -1,23 +1,23 @@
 import '../index.dart';
 
-part 'avoid_unnecessary_async_function_option.mapper.dart';
-
-@MappableClass(caseStyle: CaseStyle.snakeCase)
-class AvoidUnnecessaryAsyncFunctionOption
-    with AvoidUnnecessaryAsyncFunctionOptionMappable, OptionsMixin {
+class AvoidUnnecessaryAsyncFunctionOption extends Excludable {
   const AvoidUnnecessaryAsyncFunctionOption({
-    this.exclude = const [],
-    this.include = const [],
-    this.severity = ErrorSeverity.INFO,
+    this.excludes = const [],
+    this.includes = const [],
+    this.severity,
   });
 
-  @MappableField(hook: ErrorSeverityHook())
-  final ErrorSeverity severity;
+  final ErrorSeverity? severity;
   @override
-  final List<String> exclude;
+  final List<String> excludes;
   @override
-  final List<String> include;
+  final List<String> includes;
 
-  static const fromJson = AvoidUnnecessaryAsyncFunctionOptionMapper.fromJson;
-  static const fromMap = AvoidUnnecessaryAsyncFunctionOptionMapper.fromMap;
+  static AvoidUnnecessaryAsyncFunctionOption fromMap(Map<String, dynamic> map) {
+    return AvoidUnnecessaryAsyncFunctionOption(
+      excludes: map['excludes'] as List<String>? ?? const [],
+      includes: map['includes'] as List<String>? ?? const [],
+      severity: convertStringToErrorSeverity(map['severity']),
+    );
+  }
 }

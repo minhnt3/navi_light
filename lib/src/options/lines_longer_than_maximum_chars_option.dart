@@ -1,25 +1,26 @@
 import '../index.dart';
 
-part 'lines_longer_than_maximum_chars_option.mapper.dart';
-
-@MappableClass(caseStyle: CaseStyle.snakeCase)
-class LinesLongerThanMaximumCharsOption
-    with LinesLongerThanMaximumCharsOptionMappable, OptionsMixin {
+class LinesLongerThanMaximumCharsOption extends Excludable {
   const LinesLongerThanMaximumCharsOption({
     this.maximumChars = 100,
-    this.exclude = const [],
-    this.include = const [],
-    this.severity = ErrorSeverity.INFO,
+    this.excludes = const [],
+    this.includes = const [],
+    this.severity,
   });
   final int maximumChars;
 
-  @MappableField(hook: ErrorSeverityHook())
-  final ErrorSeverity severity;
+  final ErrorSeverity? severity;
   @override
-  final List<String> exclude;
+  final List<String> excludes;
   @override
-  final List<String> include;
+  final List<String> includes;
 
-  static const fromJson = LinesLongerThanMaximumCharsOptionMapper.fromJson;
-  static const fromMap = LinesLongerThanMaximumCharsOptionMapper.fromMap;
+  static LinesLongerThanMaximumCharsOption fromMap(Map<String, dynamic> map) {
+    return LinesLongerThanMaximumCharsOption(
+      maximumChars: map['maximum_chars'] as int? ?? 100,
+      excludes: map['excludes'] as List<String>? ?? const [],
+      includes: map['includes'] as List<String>? ?? const [],
+      severity: convertStringToErrorSeverity(map['severity']),
+    );
+  }
 }

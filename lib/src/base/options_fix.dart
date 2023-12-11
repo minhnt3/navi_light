@@ -1,36 +1,29 @@
+// MIT License
+
+// Copyright (c) 2021 Solid Software LLC
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+
 import '../index.dart';
 
-abstract class OptionsFix extends DartFix with LoadOptionsMixin {
-  @override
-  Future<void> startUp(
-    CustomLintResolver resolver,
-    CustomLintContext context,
-  ) async {
-    await setUp(resolver, context);
-    await super.startUp(resolver, context);
-  }
+/// A base class for emitting information about
+/// issues with user's `.dart` files.
+abstract class OptionsFix<T extends Object?> extends DartFix {
+  /// Constructor for [OptionsFix] model.
+  OptionsFix(this.config) : super();
 
-  @override
-  Future<void> run(
-    CustomLintResolver resolver,
-    ChangeReporter reporter,
-    CustomLintContext context,
-    AnalysisError analysisError,
-    List<AnalysisError> others,
-  ) async {
-    final options = await this.options;
-    runWithOptions(resolver, reporter, context, analysisError, others, options);
-  }
+  /// Configuration for a particular rule with all the
+  /// defined custom parameters.
+  final RuleConfig<T> config;
 
-  /// Emits lints for a given file.
-  ///
-  /// [runWithOptions] will only be invoked with files respecting [filesToAnalyze]
-  void runWithOptions(
-    CustomLintResolver resolver,
-    ChangeReporter reporter,
-    CustomLintContext context,
-    AnalysisError analysisError,
-    List<AnalysisError> others,
-    Options options,
-  );
+  /// A flag which indicates whether this rule was enabled by the user.
+  bool get enabled => config.enabled;
 }

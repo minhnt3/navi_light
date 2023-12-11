@@ -2,19 +2,19 @@ analyzer:
   plugins:
     - custom_lint
 
-navi_light:
+custom_lint:
   rules:
-    lines_longer_than_maximum_chars:
+    - lines_longer_than_maximum_chars:
       maximum_chars: 100
       severity: info
-    prefer_named_parameters:
+    - prefer_named_parameters:
       threshold: 2
       severity: warning
-    incorrect_todo_comment:
+    - incorrect_todo_comment:
       severity: error
-    prefer_is_empty_string:
+    - prefer_is_empty_string:
       severity: warning
-    prefer_is_not_empty_string:
+    - prefer_is_not_empty_string:
       severity: warning
-    avoid_unnecessary_async_function:
+    - avoid_unnecessary_async_function:
       severity: warning

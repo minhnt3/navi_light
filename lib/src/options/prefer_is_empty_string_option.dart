@@ -1,22 +1,23 @@
 import '../index.dart';
 
-part 'prefer_is_empty_string_option.mapper.dart';
-
-@MappableClass(caseStyle: CaseStyle.snakeCase)
-class PreferIsEmptyStringOption with PreferIsEmptyStringOptionMappable, OptionsMixin {
+class PreferIsEmptyStringOption extends Excludable {
   const PreferIsEmptyStringOption({
-    this.exclude = const [],
-    this.include = const [],
-    this.severity = ErrorSeverity.INFO,
+    this.excludes = const [],
+    this.includes = const [],
+    this.severity,
   });
 
-  @MappableField(hook: ErrorSeverityHook())
-  final ErrorSeverity severity;
+  final ErrorSeverity? severity;
   @override
-  final List<String> exclude;
+  final List<String> excludes;
   @override
-  final List<String> include;
+  final List<String> includes;
 
-  static const fromJson = PreferIsEmptyStringOptionMapper.fromJson;
-  static const fromMap = PreferIsEmptyStringOptionMapper.fromMap;
+  static PreferIsEmptyStringOption fromMap(Map<String, dynamic> map) {
+    return PreferIsEmptyStringOption(
+      excludes: map['excludes'] as List<String>? ?? const [],
+      includes: map['includes'] as List<String>? ?? const [],
+      severity: convertStringToErrorSeverity(map['severity']),
+    );
+  }
 }

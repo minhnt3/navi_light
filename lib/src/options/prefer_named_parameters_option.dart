@@ -1,24 +1,27 @@
 import '../index.dart';
 
-part 'prefer_named_parameters_option.mapper.dart';
-
-@MappableClass(caseStyle: CaseStyle.snakeCase)
-class PreferNamedParametersOption with PreferNamedParametersOptionMappable, OptionsMixin {
+class PreferNamedParametersOption extends Excludable {
   const PreferNamedParametersOption({
     this.threshold = 2,
-    this.exclude = const [],
-    this.include = const [],
-    this.severity = ErrorSeverity.INFO,
+    this.excludes = const [],
+    this.includes = const [],
+    this.severity,
   });
   final int threshold;
 
-  @MappableField(hook: ErrorSeverityHook())
-  final ErrorSeverity severity;
+  final ErrorSeverity? severity;
   @override
-  final List<String> exclude;
+  final List<String> excludes;
   @override
-  final List<String> include;
+  final List<String> includes;
 
-  static const fromJson = PreferNamedParametersOptionMapper.fromJson;
-  static const fromMap = PreferNamedParametersOptionMapper.fromMap;
+  static PreferNamedParametersOption fromMap(Map<String, dynamic> map) {
+    print(map);
+    return PreferNamedParametersOption(
+      threshold: map['threshold'] as int? ?? 2,
+      excludes: map['excludes'] as List<String>? ?? const [],
+      includes: map['includes'] as List<String>? ?? const [],
+      severity: convertStringToErrorSeverity(map['severity']),
+    );
+  }
 }

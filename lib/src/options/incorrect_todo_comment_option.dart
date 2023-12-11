@@ -1,22 +1,23 @@
 import '../index.dart';
 
-part 'incorrect_todo_comment_option.mapper.dart';
-
-@MappableClass(caseStyle: CaseStyle.snakeCase)
-class IncorrectTodoCommentOption with IncorrectTodoCommentOptionMappable, OptionsMixin {
+class IncorrectTodoCommentOption extends Excludable {
   const IncorrectTodoCommentOption({
-    this.exclude = const [],
-    this.include = const [],
-    this.severity = ErrorSeverity.INFO,
+    this.excludes = const [],
+    this.includes = const [],
+    this.severity,
   });
 
-  @MappableField(hook: ErrorSeverityHook())
-  final ErrorSeverity severity;
+  final ErrorSeverity? severity;
   @override
-  final List<String> exclude;
+  final List<String> excludes;
   @override
-  final List<String> include;
+  final List<String> includes;
 
-  static const fromJson = IncorrectTodoCommentOptionMapper.fromJson;
-  static const fromMap = IncorrectTodoCommentOptionMapper.fromMap;
+  static IncorrectTodoCommentOption fromMap(Map<String, dynamic> map) {
+    return IncorrectTodoCommentOption(
+      excludes: map['excludes'] as List<String>? ?? const [],
+      includes: map['includes'] as List<String>? ?? const [],
+      severity: convertStringToErrorSeverity(map['severity']),
+    );
+  }
 }

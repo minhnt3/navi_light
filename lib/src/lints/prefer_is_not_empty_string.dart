@@ -1,35 +1,41 @@
 import '../index.dart';
 
-class PreferIsNotEmptyString extends OptionsLintRule {
-  const PreferIsNotEmptyString() : super(code: _code);
+class PreferIsNotEmptyString extends OptionsLintRule<PreferIsNotEmptyStringOption> {
+  PreferIsNotEmptyString(
+    CustomLintConfigs configs,
+  ) : super(
+          RuleConfig(
+            name: lintName,
+            configs: configs,
+            paramsParser: PreferIsNotEmptyStringOption.fromMap,
+            problemMessage: (_) =>
+                'Use \'isNotEmpty\' instead of \'!=\' to test whether the string is empty.\nTry rewriting the expression to use \'isNotEmpty\'.',
+          ),
+        );
 
-  static const _code = LintCode(
-    name: 'prefer_is_not_empty_string',
-    problemMessage:
-        'Use \'isNotEmpty\' instead of \'!=\' to test whether the string is empty.\nTry rewriting the expression to use \'isNotEmpty\'.',
-  );
-
+  static const String lintName = 'prefer_is_not_empty_string';
   @override
-  void runWithOptions(
+  Future<void> run(
     CustomLintResolver resolver,
     ErrorReporter reporter,
     CustomLintContext context,
-    Options options,
-  ) {
-    if (options.isFileRuleExcluded(resolver.path)) {
+  ) async {
+    final rootPath = await resolver.rootPath;
+    final parameters = config.parameters;
+    if (parameters.shouldSkipAnalysis(
+      path: resolver.path,
+      rootPath: rootPath,
+    )) {
       return;
     }
 
-    final option = options.rules.preferIsNotEmptyStringOption;
-
-    if (option.shouldSkipFile(resolver.path)) {
-      return;
-    }
+    final code = this.code.copyWith(
+          errorSeverity: parameters.severity ?? this.code.errorSeverity,
+        );
 
     context.registry.addBinaryExpression((node) {
       if (node.operator.type == TokenType.BANG_EQ &&
           (node.leftOperand.toString() == '\'\'' || node.rightOperand.toString() == '\'\'')) {
-        final code = this.code.copyWith(errorSeverity: option.severity);
         reporter.reportErrorForNode(code, node);
       }
     });
@@ -37,20 +43,21 @@ class PreferIsNotEmptyString extends OptionsLintRule {
 
   @override
   List<Fix> getFixes() => [
-        ReplaceWithIsNotEmpty(),
+        ReplaceWithIsNotEmpty(config),
       ];
 }
 
-class ReplaceWithIsNotEmpty extends OptionsFix {
+class ReplaceWithIsNotEmpty extends OptionsFix<PreferIsNotEmptyStringOption> {
+  ReplaceWithIsNotEmpty(super.config);
+
   @override
-  void runWithOptions(
+  Future<void> run(
     CustomLintResolver resolver,
     ChangeReporter reporter,
     CustomLintContext context,
     AnalysisError analysisError,
     List<AnalysisError> others,
-    Options options,
-  ) {
+  ) async {
     context.registry.addBinaryExpression((node) {
       if (!node.sourceRange.intersects(analysisError.sourceRange) ||
           node.operator.type != TokenType.BANG_EQ ||

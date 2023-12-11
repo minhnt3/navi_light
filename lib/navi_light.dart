@@ -1,17 +1,18 @@
 import 'src/index.dart';
 
-PluginBase createPlugin() => _NalsLintsPlugin();
+PluginBase createPlugin() => _NaviLightPlugin();
 
-class _NalsLintsPlugin extends PluginBase {
+class _NaviLightPlugin extends PluginBase {
   @override
   List<LintRule> getLintRules(CustomLintConfigs configs) {
+    print(configs.rules);
     return [
-      const AvoidUnnecessaryAsyncFunction(),
-      const LinesLongerThanMaximumChars(),
-      const PreferNamedParameters(),
-      const PreferIsEmptyString(),
-      const PreferIsNotEmptyString(),
-      const IncorrectTodoComment(),
+      AvoidUnnecessaryAsyncFunction(configs),
+      LinesLongerThanMaximumChars(configs),
+      PreferNamedParameters(configs),
+      PreferIsEmptyString(configs),
+      PreferIsNotEmptyString(configs),
+      IncorrectTodoComment(configs),
     ];
   }
 }
